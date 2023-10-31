@@ -1,0 +1,91 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("BobbieTun Deptry Gui","Ocean")
+
+--Main Idea From Bobbie--
+local Credit = Window:NewTab("Credit")
+
+local CreditSection = Credit:NewSection("Credit from Bobbie")
+local CreditSection = Credit:NewSection("Discord:Bobbie#1608")
+
+
+
+CreditSection:NewButton("Active Command script", "Give you access to use 'command'", function ()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()   
+end)
+
+CreditSection:NewButton("Fly", "Become a plane",function ()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Nicuse/RobloxScripts/main/BypassedFly.lua"))()
+
+    Fly(true)
+end)
+
+
+local Main = Window:NewTab("Main")
+local MainSection = Main:NewSection("Main")
+MainSection:NewToggle("Super Speed and Jump High", "Increase your speed High(*warning: DO NOT USE IN GAME WHICH HAS AUTO DETECT CHEAT*)", function (state)
+    if state then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 120
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 120
+    else
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 45
+    end
+    
+end)
+
+local Player  = Window:NewTab("Player")
+local PlayerSection = Player:NewSection("Player")
+
+
+PlayerSection:NewSlider("WalkSpeed", "Super Speed",500,16,function (s)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+
+end)
+PlayerSection:NewSlider("Jump Power", "Super Jump",350,50,function (s)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = s
+end)
+
+PlayerSection:NewButton("Reset WS/JP","Resets stats to defaults", function ()
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = 45
+    
+end)
+
+--Other Tabs
+local Games = Window:NewTab("Game Scripts")
+local GamesSection = Games:NewSection("Script")
+
+GamesSection:NewButton("Blox Fruit", "Giving you free Script To farm", function ()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Efe0626/VoidHub/main/Script"))()   
+end)
+
+
+GamesSection:NewButton("Race Clicker", "Fast and easy to auto farm", function ()
+    loadstring(game:HttpGet(('https://raw.githubusercontent.com/Saaakai/Random-Roblox-Script/main/Race%20Clicker')))()
+end)
+
+
+GamesSection:NewButton("Musle Legends", "Very Convenience for players to grind", function ()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/LOOF-sys/Roblox-Shit/main/MuscleLegends_1.lua"))()
+end)
+
+
+GamesSection:NewButton("Tower Of Hell", "Have Good mod menu", function ()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/iiProductionz/Floater-Scripts/main/WaifuEdition/Tower%20Of%20Hell"))()
+end)
+
+
+GamesSection:NewButton("Forgotten memories ", "Helping Newbie become Pro player", function ()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/lolpoppyus/Roblox-Lua/master/ForgottenMemories.lua"))()
+end)
+
+
+local Keybind = Window:NewTab("Keybind Settings")
+local KeybindSection = Keybind:NewSection("Keybind")
+
+Keybind:NewKeybind("F", "F", Enum.KeyCode.F, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Nicuse/RobloxScripts/main/BypassedFly.lua"))()
+
+Fly(true)
+	
+end)
