@@ -56,7 +56,7 @@ local Games = Window:NewTab("Game Scripts")
 local GamesSection = Games:NewSection("Script")
 
 GamesSection:NewButton("Blox Fruit", "Giving you free Script To farm", function ()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Efe0626/VoidHub/main/Script"))()   
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/AltsegoD/script/master/loader.lua"))()  
 end)
 
 
