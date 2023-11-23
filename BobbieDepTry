@@ -55,8 +55,9 @@ end)
 local Games = Window:NewTab("Game Scripts")
 local GamesSection = Games:NewSection("Script")
 
-GamesSection:NewButton("Blox Fruit", "Giving you free Script To farm", function ()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/AltsegoD/script/master/loader.lua"))()  
+GamesSection:NewButton("Blox Fruit", "PaidScript", function ()
+    getgenv().Team = "Pirates"
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3b2169cf53bc6104dabe8e19562e5cc2.lua"))()
 end)
 
 
