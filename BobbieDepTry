@@ -1,94 +1,574 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("BobbieTun Deptry Gui","Ocean")
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
---Main Idea From Bobbie--
-local Credit = Window:NewTab("Credit")
+-- Create main window
+local Window = Fluent:CreateWindow({
+    Title = "BobbieDeptry" .. Fluent.Version,
+    SubTitle = "Remade script",
+    TabWidth = 100,
+    Size = UDim2.fromOffset(600, 500),
+    Acrylic = false,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightShift
+})
 
-local CreditSection = Credit:NewSection("Credit from Bobbie")
-local CreditSection = Credit:NewSection("Discord:Bobbie#1608")
+-- Create 6 tabs
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main"}),
+    Grind = Window:AddTab({ Title = "Grind"}),
+    Glitch = Window:AddTab({ Title = "Glitch"}),
+    AutoKill = Window:AddTab({ Title = "Auto kill"}),
+    Stats = Window:AddTab({ Title = "Stats"}),
+    Misc = Window:AddTab({ Title = "Misc"}),
+    Settings = Window:AddTab({ Title = "Settings"})
+}
 
+local Options = Fluent.Options
 
+-- Main Tab
+do
+    Tabs.Main:AddParagraph({
+        Title = "BobbieDeptry Free version",
+        Content = "This version is made by Bobbie"
+    })
 
-CreditSection:NewButton("Active Command script", "Give you access to use 'command'", function ()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()   
-end)
+    Tabs.Main:AddButton({
+        Title = "Print Hello",
+        Description = "Prints hello in console",
+        Callback = function()
+            print("Hello from Fluent UI!")
+        end
+    })
 
-CreditSection:NewButton("Fly", "Become a plane",function ()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Nicuse/RobloxScripts/main/BypassedFly.lua"))()
+    local MainToggle = Tabs.Main:AddToggle("MainToggle", {
+        Title = "Enable Features",
+        Default = false,
+        Callback = function(Value)
+            print("Main toggle set to:", Value)
+        end
+    })
+    local autoJoinBrawl = false
 
-    Fly(true)
-end)
+    local AutoBrawlToggle = Tabs.Main:AddToggle("AutoBrawlToggle", {
+        Title = "Auto Join Brawl",
+        Default = false,
+        Callback = function(Value)
+            autoJoinBrawl = Value
+        end
+    })
+    
+    task.spawn(function()
+        while true do
+            if autoJoinBrawl then
+                local brawlTimer = game:GetService("ReplicatedStorage"):WaitForChild("brawlTimer")
+                if brawlTimer.Value == 0 then
+                    task.wait(2)
+                    if brawlTimer.Value == 0 then
+                        game:GetService("ReplicatedStorage").rEvents.brawlEvent:FireServer("joinBrawl")
+                        repeat task.wait(1) until brawlTimer.Value > 0
+                    end
+                end
+            end
+            task.wait(0.5)
+        end
+    end)
+    
+    
 
+end
 
-local Main = Window:NewTab("Main")
-local MainSection = Main:NewSection("Main")
-MainSection:NewToggle("Super Speed and Jump High", "Increase your speed High(*warning: DO NOT USE IN GAME WHICH HAS AUTO DETECT CHEAT*)", function (state)
-    if state then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 120
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 120
-    else
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = 45
+-- Grind Tab
+do
+    Tabs.Grind:AddParagraph({
+        Title = "Grind Features",
+        Content = "Various Grind-related options"
+    })
+
+    local AimbotToggle = Tabs.Grind:AddToggle("AutoLiftToggle", {
+        Title = "Auto Lift Gamepass",
+        Default = false,
+        Callback = function(Value) -- this is capital V
+            if Value then
+                game:GetService("Players").LocalPlayer.autoLiftEnabled.Value = true
+            else
+                game:GetService("Players").LocalPlayer.autoLiftEnabled.Value = false
+            end
+        end
+    })
+    
+
+ 
+end
+--Glitch Tab
+
+-- AutoKill Tab
+do
+    Tabs.AutoKill:AddParagraph({
+        Title = "Auto Kill",
+        Content = "Modify to kill easier"
+    })
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local selectedPlayer = nil
+_G.loop = false
+
+-- Dropdown chọn người chơi
+local PlayerDropdown = Tabs.AutoKill:AddDropdown("PlayerDropdown", {
+    Title = "Select Player",
+    Values = {},
+    Default = nil,
+    Callback = function(Value)
+        selectedPlayer = Players:FindFirstChild(Value)
     end
+})
+
+-- Cập nhật danh sách người chơi
+local function updateDropdown()
+    local names = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(names, p.Name)
+        end
+    end
+    PlayerDropdown:SetValues(names)
+end
+
+Players.PlayerAdded:Connect(updateDropdown)
+Players.PlayerRemoving:Connect(updateDropdown)
+updateDropdown()
+
+-- AutoPunch Function
+local function autoPunch()
+    while _G.loop do
+        local char = LocalPlayer.Character
+        if char then
+            -- Equip Punch Tool if in Backpack
+            for _, v in pairs(LocalPlayer.Backpack:GetChildren()) do
+                if v:IsA("Tool") and v.Name == "Punch" then
+                    char:FindFirstChildOfClass("Humanoid"):EquipTool(v)
+                end
+            end
+
+            -- Activate Punch Tool if Equipped
+            for _, v in pairs(char:GetChildren()) do
+                if v:IsA("Tool") and v.Name == "Punch" then
+                    v:Activate()
+                end
+            end
+
+            -- Fire muscleEvent (if exists)
+            local success, err = pcall(function()
+                LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
+                LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
+            end)
+        end
+        task.wait() -- Fast loop
+    end
+end
+
+-- ESP Toggle (also activates auto punch)
+local ESPToggle = Tabs.AutoKill:AddToggle("AutoKillToggle", {
+    Title = "Auto Punch",
+    Default = false,
+    Callback = function(Value)
+        _G.loop = Value
+        if Value then
+            task.spawn(autoPunch)
+        end
+    end
+})
+
+-- Liên tục chạm vào đầu người chơi được chọn
+RunService.RenderStepped:Connect(function()
+    if _G.loop and selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("Head") then
+        local enemyHead = selectedPlayer.Character.Head
+        local char = LocalPlayer.Character
+        if char then
+            for _, handName in ipairs({"LeftHand", "RightHand"}) do
+                local hand = char:FindFirstChild(handName)
+                if hand then
+                    firetouchinterest(hand, enemyHead, 0)
+                    firetouchinterest(hand, enemyHead, 1)
+                end
+            end
+        end
+    end
+end)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- Toggle: Đánh tất cả người chơi
+local MassAttackToggle = Tabs.AutoKill:AddToggle("MassAttackToggle", {
+    Title = "Mass Attack (All Players)",
+    Default = false,
+    Callback = function(Value)
+        _G.massAttack = Value
+        if Value then
+            task.spawn(function()
+                while _G.massAttack do
+                    local char = LocalPlayer and LocalPlayer.Character
+                    if char then
+                        local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+                        -- Equip Punch tool nếu có
+                        for _, v in pairs(LocalPlayer.Backpack:GetChildren()) do
+                            if v:IsA("Tool") and v.Name == "Punch" and humanoid then
+                                humanoid:EquipTool(v)
+                            end
+                        end
+
+                        -- Kích hoạt nếu đã trang bị
+                        for _, v in pairs(char:GetChildren()) do
+                            if v:IsA("Tool") and v.Name == "Punch" then
+                                v:Activate()
+                            end
+                        end
+
+                        -- Gửi sự kiện đánh
+                        if LocalPlayer:FindFirstChild("muscleEvent") then
+                            pcall(function()
+                                LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
+                                LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
+                            end)
+                        end
+
+                        -- Va chạm head người khác
+                        for _, player in ipairs(Players:GetPlayers()) do
+                            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                                local head = player.Character.Head
+                                for _, handName in ipairs({"LeftHand", "RightHand"}) do
+                                    local hand = char:FindFirstChild(handName)
+                                    if hand and head then
+                                        pcall(function()
+                                            firetouchinterest(hand, head, 0)
+                                            firetouchinterest(hand, head, 1)
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    task.wait(0.01)
+                end
+            end)
+        end
+    end
+})
+
+end
+
+
+
+
+-- Stats Tab
+do
+    local Section = Tabs.Stats:AddSection("Script Info")
+    local startTime = tick()
     
-end)
-
-local Player  = Window:NewTab("Player")
-local PlayerSection = Player:NewSection("Player")
-
-
-PlayerSection:NewSlider("WalkSpeed", "Super Speed",500,16,function (s)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
-
-end)
-PlayerSection:NewSlider("Jump Power", "Super Jump",350,50,function (s)
-    game.Players.LocalPlayer.Character.Humanoid.JumpPower = s
-end)
-
-PlayerSection:NewButton("Reset WS/JP","Resets stats to defaults", function ()
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-    game.Players.LocalPlayer.Character.Humanoid.JumpPower = 45
+    -- Create a paragraph to update
+    local timerParagraph = Section:AddParagraph({
+        Title = "Script running for 00:00"
+    })
     
-end)
+    -- Update it every second
+    task.spawn(function()
+        while true do
+            task.wait(1)
+            local elapsed = math.floor(tick() - startTime)
+            local minutes = math.floor(elapsed / 60)
+            local seconds = elapsed % 60
+            local timeString = string.format("%02d:%02d", minutes, seconds)
+            timerParagraph:SetTitle("Script running for " .. timeString)
+        end
+    end)
+    local player = game:GetService("Players").LocalPlayer
+    local leaderstats = player:WaitForChild("leaderstats")
+    
+    local Section = Tabs.Stats:AddSection("Stats Gained")
+    
+    -- Initial stat values
+    local initialStrength = leaderstats.Strength.Value
+    local initialDurability = player:WaitForChild("Durability").Value
+    local initialRebirths = leaderstats.Rebirths.Value
+    local initialAgility = player:WaitForChild("Agility").Value
+    local initialKills = leaderstats.Kills.Value
+    local initialBrawls = leaderstats.Brawls.Value
+    
+    -- Create individual paragraphs
+    local strengthPara = Section:AddParagraph({ Title = "Strength: Calculating..." })
+    local durabilityPara = Section:AddParagraph({ Title = "Durability: Calculating..." })
+    local rebirthsPara = Section:AddParagraph({ Title = "Rebirths: Calculating..." })
+    local agilityPara = Section:AddParagraph({ Title = "Agility: Calculating..." })
+    local killsPara = Section:AddParagraph({ Title = "Kills: Calculating..." })
+    local brawlsPara = Section:AddParagraph({ Title = "Brawls: Calculating..." })
+    
+    -- Update all every second
+    task.spawn(function()
+        while true do
+            task.wait(0.01)
+    
+            strengthPara:SetTitle("Strength: +" .. (leaderstats.Strength.Value - initialStrength))
+            durabilityPara:SetTitle("Durability: +" .. (player.Durability.Value - initialDurability))
+            rebirthsPara:SetTitle("Rebirths: +" .. (leaderstats.Rebirths.Value - initialRebirths))
+            agilityPara:SetTitle("Agility: +" .. (player.Agility.Value - initialAgility))
+            killsPara:SetTitle("Kills: +" .. (leaderstats.Kills.Value - initialKills))
+            brawlsPara:SetTitle("Brawls: +" .. (leaderstats.Brawls.Value - initialBrawls))
+        end
+    end)
+    
 
---Other Tabs
-local Games = Window:NewTab("Game Scripts")
-local GamesSection = Games:NewSection("Script")
-
-GamesSection:NewButton("Blox Fruit-W-Azure", "PaidScript", function ()
-    getgenv().Team = "Pirates"
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3b2169cf53bc6104dabe8e19562e5cc2.lua"))()
-end)
-
-GamesSection:NewButton("Blox Fruit Doraemon", "FreeScript", function ()
-	loadstring(game:HttpGet('https://raw.githubusercontent.com/onepicesenpai/onepicesenpai/main/onichanokaka'))()
-
-GamesSection:NewButton("Race Clicker", "Fast and easy to auto farm", function ()
-    loadstring(game:HttpGet(('https://raw.githubusercontent.com/Saaakai/Random-Roblox-Script/main/Race%20Clicker')))()
-end)
 
 
-GamesSection:NewButton("Musle Legends", "Very Convenience for players to grind", function ()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/LOOF-sys/Roblox-Shit/main/MuscleLegends_1.lua"))()
-end)
+end
+
+-- Misc Tab
+do
+    Tabs.Misc:AddParagraph({
+        Title = "Miscellaneous",
+        Content = "Various other features"
+    })
+    local AntiAfkConnection
+    local AntiAFKToggle = Tabs.Misc:AddToggle("AntiAFKToggle", {
+        Title = "Anti AFK",
+        Default = false,
+        Callback = function(Value)
+            if Value then
+                AntiAfkConnection = game:GetService("Players").LocalPlayer.Idled:Connect(function()
+                    -- Simulate a user input to prevent AFK kick
+                    local VirtualUser = game:GetService("VirtualUser")
+                    VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+                    task.wait(1)
+                    VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+                end)
+            else
+                if AntiAfkConnection then
+                    AntiAfkConnection:Disconnect()
+                    AntiAfkConnection = nil
+                end
+            end
+        end
+    })
+    
+
+    -- Noclip
+    local noclip = false
+    local NoclipToggle = Tabs.Misc:AddToggle("NoclipToggle", {
+        Title = "Noclip",
+        Default = false,
+        Callback = function(Value)
+            noclip = Value
+        end
+    })
+
+    game:GetService("RunService").Stepped:Connect(function()
+        if noclip then
+            for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") and v.CanCollide == true then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end)
+
+    -- Infinite Jump
+    local infJumpEnabled = false
+    local InfJumpToggle = Tabs.Misc:AddToggle("InfJumpToggle", {
+        Title = "Infinite Jump",
+        Default = false,
+        Callback = function(Value)
+            infJumpEnabled = Value
+        end
+    })
+
+    game:GetService("UserInputService").JumpRequest:Connect(function()
+        if infJumpEnabled then
+            local Humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if Humanoid then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end)
+
+    -- Full Bright
+    local FullBrightToggle = Tabs.Misc:AddToggle("FullBrightToggle", {
+        Title = "Full Bright",
+        Default = false,
+        Callback = function(Value)
+            if Value then
+                game:GetService("Lighting").Brightness = 2
+                game:GetService("Lighting").ClockTime = 12
+                game:GetService("Lighting").FogEnd = 100000
+                game:GetService("Lighting").GlobalShadows = false
+            else
+                -- Khôi phục lại lighting mặc định nếu cần
+                game:GetService("Lighting").Brightness = 1
+                game:GetService("Lighting").ClockTime = 12
+                game:GetService("Lighting").FogEnd = 10000000
+                game:GetService("Lighting").GlobalShadows = false
+            end
+        end
+    })
+
+    -- FPS Boost
+-- FPS Boost (Fixed version)
+local firstToggle = true
+
+local FPSToggle = Tabs.Misc:AddToggle("FPSToggle", {
+    Title = "FPS Boost",
+    Default = false,
+    Callback = function(Value)
+        if firstToggle then
+            firstToggle = false
+            return -- skip initial callback
+        end
+
+        if Value then
+            for _, v in pairs(game:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    pcall(function()
+                        v.Material = Enum.Material.SmoothPlastic
+                        v.Reflectance = 0
+                    end)
+                elseif v:IsA("Decal") then
+                    pcall(function()
+                        v.Texture = ""
+                    end)
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    pcall(function()
+                        v.Enabled = false
+                    end)
+                end
+            end
+
+            local Lighting = game:GetService("Lighting")
+            Lighting.GlobalShadows = false
+            Lighting.FogEnd = 100000
+            Lighting.Brightness = 2
+        else
+            print("Please rejoin the game to restore original graphics.")
+        end
+    end
+})
 
 
-GamesSection:NewButton("Tower Of Hell", "Have Good mod menu", function ()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/iiProductionz/Floater-Scripts/main/WaifuEdition/Tower%20Of%20Hell"))()
-end)
+
+end
 
 
-GamesSection:NewButton("Forgotten memories ", "Helping Newbie become Pro player", function ()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/lolpoppyus/Roblox-Lua/master/ForgottenMemories.lua"))()
-end)
+-- Settings Tab (for Save/Load config)
+do
+    SaveManager:SetLibrary(Fluent)
+    InterfaceManager:SetLibrary(Fluent)
+    
+    SaveManager:IgnoreThemeSettings()
+    SaveManager:SetIgnoreIndexes({})
+    
+    InterfaceManager:SetFolder("FluentLibrary")
+    SaveManager:SetFolder("FluentLibrary/Configs")
+    
+    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+    SaveManager:BuildConfigSection(Tabs.Settings)
+end
 
+-- Initialize
+Window:SelectTab(1)
+Fluent:Notify({
+    Title = "Library Loaded",
+    Content = "6-tab library initialized successfully!",
+    Duration = 5
+})
+do
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    
+    local RockDropdown
+    local selectedRock = nil
+    
+    RockDropdown = Tabs.Glitch:AddDropdown("RockDropdown", {
+        Title = "Select Rock",
+        Description = "Choose a rock to glitch",
+        Values = {
+            "Select Rock",
+            "Ancient Jungle Rock",
+            "Frozen Rock",
+            "Inferno Rock",
+            "Muscle King Mountain",
+            "Rock Of Legends",
+            "Tiny Rock"
+        },
+        Default = 1,
+        Callback = function(Value)
+            if Value ~= "Select Rock" then
+                selectedRock = workspace.machinesFolder:FindFirstChild(Value)
+            else
+                selectedRock = nil
+            end
+        end
+    })
+    
+    Tabs.Glitch:AddToggle("GlitchToggle", {
+        Title = "Glitch Rock + Auto Punch",
+        Description = "Auto Glitch",
+        Default = false,
+        Callback = function(Value)
+            _G.autoGlitch = Value
+    
+            if Value then
+                task.spawn(function()
+                    while _G.autoGlitch do
+                        local char = LocalPlayer and LocalPlayer.Character
+                        if char then
+                            local humanoid = char:FindFirstChildOfClass("Humanoid")
+    
+                            -- Equip Punch tool if in backpack
+                            for _, v in pairs(LocalPlayer.Backpack:GetChildren()) do
+                                if v:IsA("Tool") and v.Name == "Punch" and humanoid then
+                                    humanoid:EquipTool(v)
+                                end
+                            end
+    
+                            -- Activate punch if equipped
+                            for _, v in pairs(char:GetChildren()) do
+                                if v:IsA("Tool") and v.Name == "Punch" then
+                                    v:Activate()
+                                end
+                            end
+    
+                            -- Fire punch events
+                            if LocalPlayer:FindFirstChild("muscleEvent") then
+                                pcall(function()
+                                    LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
+                                    LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
+                                end)
+                            end
+    
+                            -- Connect hands to selected rock
+                            if selectedRock and selectedRock:FindFirstChild("Rock") then
+                                local rock = selectedRock.Rock
+                                for _, handName in ipairs({"LeftHand", "RightHand"}) do
+                                    local hand = char:FindFirstChild(handName)
+                                    if hand and rock then
+                                        pcall(function()
+                                            firetouchinterest(hand, rock, 0)
+                                            firetouchinterest(hand, rock, 1)
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                        task.wait(0.01)
+                    end
+                end)
+            end
+        end
+    })
+    
+    
+end
 
-local Keybind = Window:NewTab("Keybind Settings")
-local KeybindSection = Keybind:NewSection("Keybind")
-
-Keybind:NewKeybind("F", "F", Enum.KeyCode.F, function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Nicuse/RobloxScripts/main/BypassedFly.lua"))()
-
-Fly(true)
-	
-end)
+SaveManager:LoadAutoloadConfig()
